@@ -1,0 +1,14 @@
+[project]
+name = "apartment-crawler"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx",
+    "beautifulsoup4",
+    "lxml",
+    "python-dotenv",
+    "rich",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]

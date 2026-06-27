@@ -1,0 +1,46 @@
+name: Apartment Crawler
+
+on:
+  schedule:
+    # Every 10 minutes
+    - cron: "*/10 * * * *"
+  workflow_dispatch:  # allow manual trigger
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore seen listings DB
+        uses: actions/cache@v4
+        with:
+          path: seen_listings.db
+          key: seen-listings-db
+          restore-keys: seen-listings-db
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install httpx beautifulsoup4 lxml python-dotenv rich
+
+      - name: Run crawler
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          MIN_ROOMS: ${{ vars.MIN_ROOMS || '2' }}
+          MAX_RENT: ${{ vars.MAX_RENT || '2500' }}
+          DISTRICTS: ${{ vars.DISTRICTS || '' }}
+          WBS: ${{ vars.WBS || 'any' }}
+        run: python crawler.py --once
+
+      - name: Save seen listings DB
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: seen_listings.db
+          key: seen-listings-db
