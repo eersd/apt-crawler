@@ -25,7 +25,9 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install httpx beautifulsoup4 lxml python-dotenv rich
+        run: |
+          pip install httpx beautifulsoup4 lxml python-dotenv rich playwright
+          playwright install chromium --with-deps
 
       - name: Run crawler
         env:
@@ -36,7 +38,13 @@ jobs:
           MAX_RENT: ${{ vars.MAX_RENT || '2500' }}
           DISTRICTS: ${{ vars.DISTRICTS || '' }}
           WBS: ${{ vars.WBS || 'any' }}
-        run: python crawler.py --once
+        # --seed on first run (empty DB), --once on subsequent runs
+        run: |
+          if [ -f seen_listings.db ]; then
+            python crawler.py --once
+          else
+            python crawler.py --seed
+          fi
 
       - name: Save seen listings DB
         uses: actions/cache/save@v4

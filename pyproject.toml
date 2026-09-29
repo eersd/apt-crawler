@@ -8,6 +8,7 @@ dependencies = [
     "lxml",
     "python-dotenv",
     "rich",
+    "playwright",
 ]
 
 [project.optional-dependencies]
